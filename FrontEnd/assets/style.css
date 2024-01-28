@@ -48,15 +48,21 @@ table {
 }
 /** end reset css**/
 body {
-	max-width: 1140px;
-	margin:auto;
+	max-width: 1440px;
 	font-family: 'Work Sans' ;
 	font-size: 14px;
+	background-color: #FFFEF8;
+}
+
+header, main {
+	margin-left: 150px;
+	margin-right: 150px;
 }
 header {
 	display: flex;
 	justify-content: space-between;
-	margin: 50px 0
+	margin-top: 50px;
+	margin-bottom: 151px;
 }
 section {
 	margin: 50px 0
@@ -88,11 +94,17 @@ nav ul {
 	display: flex;
 	align-items: center;
 	list-style-type: none;
+	gap: 30px;
 
 }
 nav li {
 	padding: 0 10px;
 	font-size: 1.2em;
+}
+
+li img {
+	width: 22px;
+	height: 22px;
 }
 
 li:hover {
@@ -101,19 +113,17 @@ li:hover {
 #introduction {
 	display: flex;
 	align-items: center;
-}
-#introduction figure {
-	flex: 1
-}
-#introduction img {
-	display: block;
-	margin: auto;
-	width: 80%;
+	gap: 72px;
+	padding-left: 95px;
+	padding-right: 95px;
 }
 
-#introduction article {
-	flex: 1
+#introduction img {
+	display: block;
+	width: 474px;
+	height: 355px;
 }
+
 #introduction h2 {
 	margin-bottom: 1em;
 }
@@ -121,12 +131,46 @@ li:hover {
 #introduction p {
 	margin-bottom: 0.5em;
 }
+
+#portfolio {
+	margin-top: 8.6875rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
 #portfolio h2 {
 	text-align: center;
-	margin-bottom: 1em;
+	margin-bottom: 3.1875rem;
+}
+
+/*** Styles apportés aux éléments aux boutons filtres JS  ***/
+.filters {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	margin-bottom: 51px;
+	height: 37px;
+}
+
+.filters button {
+	border-radius: 60px;
+	border: 1px solid #1D6154;
+	color: #1D6154;
+	background-color: #FFFEF8;
+	font-family: syne;
+	font-size: 1em;
+	min-width: 100px;
+	max-width: 198px;
+	padding-left: 9px;
+	padding-right: 11px;
+}
+
+.filters button:hover {
+	color: #FFFFFF;
+	background-color: #1D6154;
 }
 .gallery {
-	width: 100%;
+	width: 84%;
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
 	grid-column-gap: 20px;
@@ -135,24 +179,31 @@ li:hover {
 
 .gallery img {
 	width: 100%;
+	margin-bottom: 7px;
 
 }
 #contact {
 	width: 50%;
-margin: auto;
+	margin: auto;
+	margin-top: 57px;
 }
 #contact > * {
 	text-align: center;
+}
 
+#contact > p {
+	font-size: 1rem;
 }
 #contact h2{
 	margin-bottom: 20px;
 }
 #contact form {
 	text-align: left;
-	margin-top:30px;
+	margin-top: 19px;
 	display: flex;
 	flex-direction: column;
+	width: 70%;
+	padding-left: 85px
 }
 
 #contact input {
@@ -180,6 +231,10 @@ input[type="submit"]{
 	border-radius: 60px ;
 }
 
+footer {
+	background-color: #FFFFFF;
+	border: 1px solid #FFFFFF;
+}
 footer nav ul {
 	display: flex;
 	justify-content: flex-end;

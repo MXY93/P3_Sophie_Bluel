@@ -1,87 +1,80 @@
 const apiURL = "http://localhost:5678/api/works"
 
 let globalProjectsData = [];
+let categoryToIdMap = {};
+const gallery = document.querySelector(".gallery");
+const portfolio = document.getElementById("portfolio");
+const divFilters = document.createElement("div");
+divFilters.classList.add("filters");
+portfolio.appendChild(divFilters);
+portfolio.insertBefore(divFilters, gallery);
+
 function getProjects() {
    fetch(apiURL)
     .then(response => response.json())
     .then(data => {
         console.log(data);
         globalProjectsData = data;
-        createFilterButtons(data);
+        createCategoryToIdMap(data);
+        createFilterButtons();
         showProjects(data);
     }) 
 }
 
-getProjects();
-function showProjects(data) {
-    const gallery = document.querySelector(".gallery")
-    gallery.innerHTML = "";
+function createCategoryToIdMap(data) {
     data.forEach(project => {
-        const projectFigure = document.createElement("figure");
-
-        const projectImage = document.createElement("img");
-        projectImage.src = project.imageUrl;
-        projectImage.alt = project.title;
-
-        const projectFigcaption = document.createElement("figcaption");
-        projectFigcaption.textContent = project.title;
-
-        projectFigure.appendChild(projectImage);
-        projectFigure.appendChild(projectFigcaption);
-
-        gallery.appendChild(projectFigure);
-})}
-
-
-const gallery = document.querySelector(".gallery")
-
-const buttonNames = ["Objets", "Appartements", "Hôtels & restaurants"];
-const divFilters = document.createElement("div");
-divFilters.classList.add("filters");
-const portfolio = document.getElementById("portfolio");
-const filterContainer = document.querySelector(".filters")
-
-
-
-
-function createFilterButtons(data) {
-    const uniqueCategoryNames = [...new Set(data.map(item => item.category.name))];
-    const filterButtonsContainer = divFilters;
-
-    const allButton = document.createElement("button");
-    allButton.innerText = "Tous";
-    allButton.id="all";
-    allButton.addEventListener("click", () => showAllProjects());
-    filterButtonsContainer.appendChild(allButton);
+        if (!categoryToIdMap[project.category.name]) {
+            categoryToIdMap[project.category.name] = project.category.id;
+        }
+    });
+}
+function createFilterButtons() {
+    const uniqueCategoryNames = [...new Set(globalProjectsData.map(item => item.category.name))];
+    createButton("Tous", showAllProjects, divFilters);
 
     uniqueCategoryNames.forEach(categoryName => {
-        const button = document.createElement('button');
-        button.innerText = categoryName;
-        button.addEventListener('click', () => filterItems(categoryName));
-        filterButtonsContainer.appendChild(button);
+        createButton(categoryName, () => filterItems(categoryName), divFilters);
     });
 }
-portfolio.appendChild(divFilters);
-portfolio.insertBefore(divFilters, gallery);
 
+function createButton(text, eventListener, container){
+    const button = document.createElement('button');
+    button.innerText = text;
+    button.addEventListener('click', eventListener);
+    container.appendChild(button);
+}
+
+function adjustTitle(title){
+    const corrections = {
+        "Hotels & restaurants": "Hôtels & restaurants",
+        "Abajour Tahina": "Abat-jour Tahina",
+        "Villa “La Balisiere” - Port Louis": "Villa “La Balisière” - Port-Louis",
+        "Hotel First Arte - New Delhi": "Hôtel First Arte - New Delhi"
+    };
+    return corrections [title] || title;
+}
+function showProjects(data) {
+    gallery.innerHTML = "";
+    data.forEach(project => {
+        const projectElement = createProjectElement(project);
+        gallery.appendChild(projectElement);
+})}
+
+function createProjectElement(project){
+    const projectElement = document.createElement("figure");
+    projectElement.className = "project";
+    const adjustedTitle = adjustTitle(project.title);
+    projectElement.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">
+                                <h3>${adjustedTitle}</h3>`;
+    return projectElement;
+}
 function showAllProjects(){
-    const projectsContainer = document.querySelector(".gallery");
-    projectsContainer.innerHTML = '';
     showProjects(globalProjectsData);
 }
-showAllProjects()
 function filterItems(categoryName) {
-    const categoryId = globalProjectsData.find(project => project.category.name === categoryName).category.id;
+    const categoryId = categoryToIdMap[categoryName];
     const filteredProjects = globalProjectsData.filter(project => project.categoryId === categoryId);
-    const projectsContainer = document.querySelector(".gallery");
-    projectsContainer.innerHTML = '';
-
-    filteredProjects.forEach(project => {
-        const projectElement = document.createElement('div');
-        projectElement.className = 'project';
-        projectElement.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">
-                                    <h3>${project.title}</h3>`
-        projectsContainer.appendChild(projectElement);
-    });
-    console.log(projectsContainer);
+    showProjects(filteredProjects);
 }
+
+getProjects();
