@@ -18,6 +18,7 @@ function getProjects() {
         createCategoryToIdMap(data);
         createFilterButtons();
         showProjects(data);
+        showProjectsInModal();
     }) 
 }
 
@@ -40,6 +41,7 @@ function createFilterButtons() {
 function createButton(text, eventListener, container){
     const button = document.createElement('button');
     button.innerText = text;
+    button.classList.add("filterBtn");
     button.addEventListener('click', eventListener);
     container.appendChild(button);
 }
@@ -80,22 +82,132 @@ function filterItems(categoryName) {
 getProjects();
 
 // JavaScript pour l'admin //
+
+//Stockage du token //
 const storedToken = localStorage.getItem('token');
+let textSpan = document.createElement('span');
+let textSpanLink = document.createElement('a');
+
+//Condition d'afficher les différents éléments admin en fonction de si on est connecté ou non //
 if (storedToken === 'eyJhbGciOiJIeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4UzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4'){
-    console.log("Token correspond ! Prêt à créer de nouveaux éléments");
+    // Création de la bannière d'édition //
     let banner = document.createElement("div");
     banner.classList.add("banner");
     document.body.appendChild(banner);
+
     const header = document.querySelector('header');
     if (header) {
         header.insertAdjacentElement('beforebegin', banner);
     }
+
     let bannerIcon = document.createElement("i");
     bannerIcon.className = "fa-regular fa-pen-to-square";
+    banner.appendChild(bannerIcon);
+
     let bannerPrg = document.createElement("p");
     bannerPrg.classList.add("bannerPrg");
-    banner.appendChild(bannerIcon);
+    bannerPrg.innerHTML = "Mode édition";
     banner.appendChild(bannerPrg);
-    bannerPrg.innerHTML = "Mode Édition";
 
+    // Modification du bouton logIN en logOUT //
+    let logOutBtn = document.getElementById("logout")
+    logOutBtn.innerText = "logout";
+    logOutBtn.addEventListener('click',  ()=> {
+        localStorage.removeItem('token')
+        location.reload() 
+    })
+
+    // Désactivation des filtres //
+    let filters = document.querySelector(".filters");
+    filters.style.display = 'none';
+
+    // Création du lien vers la modale "modifier" et de son icône près du h2 mes projets //
+    let icon = document.createElement('i');
+    icon.className = "fa-regular fa-pen-to-square"
+
+    let modifPrg = document.createElement('p');
+    modifPrg.appendChild(icon);
+
+    textSpanLink.href = '#';
+    textSpanLink.id = 'editLink';
+    textSpanLink.textContent = "modifier";
+    textSpanLink.addEventListener('click', openModal);
+
+    modifPrg.appendChild(textSpanLink);
+
+    let myProjects = document.querySelector("#portfolio h2");
+    let divMyProjects = document.createElement('div');
+    divMyProjects.className = "divMyProjects";
+    divMyProjects.appendChild(myProjects)
+    divMyProjects.appendChild(modifPrg);
+
+    if(storedToken) {
+        myProjects.style.marginBottom  = "0px";
+    }
+
+    portfolio.appendChild(divMyProjects);
+    portfolio.insertBefore(divMyProjects, filters);
 }
+
+// Javascript pour la modale //
+
+const galleryModal = document.querySelector(".modalContent");
+
+function showProjectsInModal(){
+    globalProjectsData.forEach(project => {
+        const projectElementModal = createProjectElementModal(project);
+        document.querySelector(".modalContent").appendChild(projectElementModal);
+    });
+}
+function openModal () {
+    let modal = document.getElementById("modal");
+    if (modal) {
+        modal.style.display = 'flex';
+        localStorage.setItem('modalOpen', 'true');
+        document.getElementById("modal-wrapper-PictureAdd").style.display = "none";
+    } else {
+        console.error("Élément modal introuvable")
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    let modalOpen = localStorage.getItem('modalOpen');
+    if (modalOpen === 'true') {
+        openModal();
+    }
+    function closeModal () {
+        let modal = document.getElementById("modal");
+        if (modal) {
+            modal.style.display="none";
+            localStorage.removeItem('modalOpen');
+        }
+    }
+    let exitIcon = document.getElementById("exitIcon");
+    if (exitIcon) {
+        exitIcon.addEventListener('click', closeModal);
+    } else {
+        console.error("Icône de sortie introuvable")
+    }
+    window.addEventListener('click', function(event) {
+        let modal = document.getElementById("modal");
+        if(event.target === modal) {
+            closeModal()
+        }
+    })
+    let editLink = document.getElementById('editLink');
+    if (editLink) {
+        editLink.addEventListener('click', function(e){
+            e.preventDefault();
+        });
+    } else {
+        console.error("Lien d'édition introuvable")
+    }
+});
+
+function createProjectElementModal(project){
+    const projectElementModal = document.createElement("figure");
+    projectElementModal.className = "projectModal";
+    projectElementModal.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">`;
+  return projectElementModal;
+};
