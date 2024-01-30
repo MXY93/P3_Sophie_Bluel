@@ -284,9 +284,38 @@ footer nav ul {
 	margin-left: 11.42px;
 }
 
+.divMyProjects {
+	display: flex;
+	justify-content: center;
+	width: 84%;
+	margin-bottom: 92px;
+}
 
+.divMyProjects::before,  .divMyProjects::after {
+	content:"";
+	flex: 1;
+}
+
+.divMyProjects h2 {
+	flex-grow: 0;
+	padding-right: 31px;
+	padding-left: 115px;
+}
+
+.divMyProjects i {
+	padding-right: 11px;
+}
+
+.divMyProjects p {
+	display: flex;
+	align-items: center;
+}
+
+.divMyProjects p a {
+	margin-top: 3px;
+}
 /*** Style de la modale ***/
-.modal {
+#modal {
 	position: fixed;
 	display: flex;
 	align-items: center;
@@ -303,6 +332,58 @@ footer nav ul {
 	width: 630px;
 	max-width: calc(100vw - 20px);
 	max-height: calc(100vh - 20px);
-	padding: 20px;
+	padding: 30px;
 	background-color: #FFF;
+}
+
+/*** Style des modales ***/
+.icon-container-modalClose {
+	display: flex;
+	justify-content: flex-end;
+}
+
+#exitIcon {
+	cursor: pointer;
+}
+
+.modal-title {
+	text-align: center;
+	font-size: 1.625rem;
+}
+
+.modalContent {
+    display: grid;
+    grid-template-columns: repeat(5, 78px);
+    row-gap: 29.5px;
+	column-gap: 10px;
+	align-items: center;
+	justify-content: center;
+	margin-top: 46px;
+}
+
+.projectModal {
+	width: 78px;
+}
+.projectModal img {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}
+
+.button-container {
+	text-align: center;
+	padding: 38px 38px 23px 38px;
+	margin-top: 67.3px;
+	margin-left: 70px;
+	margin-right: 70px;
+	border-top: 1px solid #B3B3B3;
+}
+
+#addPictureButton {
+	padding: 10px 49px;
+	border-radius: 60px;
+	color: #FFFFFF;
+	background-color: #1D6154;
+	border: 2px solid #1D6154;
+	font-family: Syne;
 }
