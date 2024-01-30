@@ -7,17 +7,44 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/f43c986d65.js" crossorigin="anonymous"></script>
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
 	<script src="script.js" defer></script>
 </head>
 <body>
+	<aside id="modal1">
+		<div class="modal-wrapper" id="modal-wrapper-GalleryEdit">
+			<div class="icon-container-modalClose"></div>
+			<h3>Galerie photo</h3>
+			<div class="modalContent"></div>
+			<button id="addPictureButton">Ajouter une photo</button>
+		</div>
+		<div class="modal-wrapper" id="modal-wrapper-PictureAdd">
+			<div class="icon-container-modalClose modalGetBack"></div>
+			<h3>Ajout photo</h3>
+				<form id="addPictureForm" action="#" method="post" name="addPictureForm">
+					<div class="addPicture">
+						<i></i>
+						<button>+ Ajouter photo</button>
+						<p>jpg, png : 4mo max</p>
+					</div>
+					<label for="title">Titre</label>
+					<input type="text" name="title" id="title">
+					<label for="category" id="category">Catégorie</label>
+					<select name="category" id="category">
+						
+					</select>
+					<input type="submit" value="Valider">
+				</form>
+		</div>
+	</aside>
 <header>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 	<nav>
 		<ul>
-			<li>projets</li>
-			<li>contact</li>
+			<li><a href="#portfolio">projets</a></li>
+			<li><a href="#contact">contact</a></li>
 			<li><a href="login.html">login</a></li>
 			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 		</ul>

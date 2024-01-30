@@ -1,4 +1,4 @@
-const apiURL = "http://localhost:5678/api/works"
+const apiURL = "http://localhost:5678/api/works";
 
 let globalProjectsData = [];
 let categoryToIdMap = {};
@@ -78,3 +78,24 @@ function filterItems(categoryName) {
 }
 
 getProjects();
+
+// JavaScript pour l'admin //
+const storedToken = localStorage.getItem('token');
+if (storedToken === 'eyJhbGciOiJIeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4UzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4'){
+    console.log("Token correspond ! Prêt à créer de nouveaux éléments");
+    let banner = document.createElement("div");
+    banner.classList.add("banner");
+    document.body.appendChild(banner);
+    const header = document.querySelector('header');
+    if (header) {
+        header.insertAdjacentElement('beforebegin', banner);
+    }
+    let bannerIcon = document.createElement("i");
+    bannerIcon.className = "fa-regular fa-pen-to-square";
+    let bannerPrg = document.createElement("p");
+    bannerPrg.classList.add("bannerPrg");
+    banner.appendChild(bannerIcon);
+    banner.appendChild(bannerPrg);
+    bannerPrg.innerHTML = "Mode Édition";
+
+}
