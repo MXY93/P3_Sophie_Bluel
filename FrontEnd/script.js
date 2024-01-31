@@ -208,6 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function createProjectElementModal(project){
     const projectElementModal = document.createElement("figure");
     projectElementModal.className = "projectModal";
+    const trashIcon = document.createElement("i");
+    trashIcon.className = "fa-solid fa-trash-can";
     projectElementModal.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">`;
-  return projectElementModal;
+    projectElementModal.appendChild(trashIcon);
+    return projectElementModal;
 };
