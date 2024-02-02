@@ -334,21 +334,29 @@ footer nav ul {
 	max-height: calc(100vh - 20px);
 	padding: 30px;
 	background-color: #FFF;
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	min-height: 670px;
 }
 
 /*** Style des modales ***/
+
+/*** Modale Galerie ***/
 .icon-container-modalClose {
 	display: flex;
 	justify-content: flex-end;
 }
 
-#exitIcon {
+.fa-solid {
 	cursor: pointer;
+	font-size: 24px;
 }
 
 .modal-title {
 	text-align: center;
 	font-size: 1.625rem;
+	margin-top: 10px
 }
 
 .modalContent {
@@ -384,18 +392,120 @@ footer nav ul {
 }
 .button-container {
 	text-align: center;
-	padding: 38px 38px 23px 38px;
+	padding: 38px 38px 18px 38px;
 	margin-top: 67.3px;
 	margin-left: 70px;
 	margin-right: 70px;
 	border-top: 1px solid #B3B3B3;
 }
 
-#addPictureButton {
+.modal-button {
 	padding: 10px 49px;
 	border-radius: 60px;
 	color: #FFFFFF;
 	background-color: #1D6154;
 	border: 2px solid #1D6154;
 	font-family: Syne;
+	cursor: pointer;
+}
+
+/*** Modale Ajouter un projet ***/
+
+.modalGetBack {
+	justify-content: space-between;
+}
+
+#addPictureForm {
+	display: flex;
+	flex-direction: column;
+	padding: 0 75px;
+	margin-top: 35px;
+}
+
+#addPictureForm label {
+	margin-bottom: 10px;
+}
+.addPicture {
+	text-align: center;
+	background-color: rgba(232, 241, 246, 1);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 7px;
+	padding-top: 19px;
+	padding-bottom: 19px;
+	margin-bottom: 30px;
+	border-radius: 3px;
+}
+
+.addPicture .fa-image {
+	font-size: 60px;
+	color: rgba(185, 197, 204, 1);
+}
+
+#addPictureForm input, .select-container {
+	height: 50px;
+    font-size: 1.2em;
+    border: none;
+    box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	margin-bottom: 20px;
+}
+
+.modal-button-add-pic {
+	background-color: rgba(203, 214, 220, 1);
+	color: rgba(48, 102, 133, 1);
+	border: none;
+	width: 40%;
+	padding: 10px 25px;
+	font-family: Work Sans;
+	font-size: 14px;
+}
+
+.addPicture p {
+	color: rgba(68, 68, 68, 1);
+	font-size: 10px;
+}
+
+.send-button-container {
+	margin: 28px 0 0;
+}
+
+#sendProjectButton {
+	min-width: 237px;
+	background-color: rgba(167, 167, 167, 1);
+	border: none;
+}
+
+.select-container {
+    position: relative;
+    display: flex;
+	justify-content: flex-end;
+}
+
+.select-container select {
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	border: none;
+	padding: 10px;
+	padding-right: 30px;
+	background-color: transparent;
+}
+
+.select-container .chevron-container {
+	position: absolute;
+	right: 0;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	width: 38px;
+}
+
+.chevron-container i {
+	font-size: 12px;
+	color: rgba(108, 108, 108, 1);
+}
+
+button, a, select, input,  textarea, .fa-xmark,  .fa-trash-can, .fa-arrow-left{
+	
 }
