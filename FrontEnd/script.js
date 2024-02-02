@@ -81,7 +81,10 @@ function filterItems(categoryName) {
 
 getProjects();
 
-// JavaScript pour l'admin //
+
+                                        /////////////////////////////////////////////////
+                                        //////////// JavaScript pour l'admin ////////////
+                                        /////////////////////////////////////////////////
 
 //Stockage du token //
 const storedToken = localStorage.getItem('token');
@@ -147,54 +150,100 @@ if (storedToken === 'eyJhbGciOiJIeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW
 
     portfolio.appendChild(divMyProjects);
     portfolio.insertBefore(divMyProjects, filters);
-}
 
-// Javascript pour la modale //
+}
+                                        ///////////////////////////////////////////////////
+                                        //////////// Javascript pour la modale ////////////
+                                        ///////////////////////////////////////////////////
 
 const galleryModal = document.querySelector(".modalContent");
+const focusableSelector = "button, a, input, textarea, .fa-xmark, .fa-trash-can, .fa-arrow-left, .fa-chevron-down";
+let focusables = [];
+let previouslyFocusedElement = null;
 
+// Fonction qui récupère les projets de l'API //
 function showProjectsInModal(){
     globalProjectsData.forEach(project => {
         const projectElementModal = createProjectElementModal(project);
         document.querySelector(".modalContent").appendChild(projectElementModal);
     });
 }
+
+// Fonction qui ouvre la modale //
 function openModal () {
     let modal = document.getElementById("modal");
     if (modal) {
         modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-modal', 'true');
         localStorage.setItem('modalOpen', 'true');
         document.getElementById("modal-wrapper-PictureAdd").style.display = "none";
+        focusables = Array.from(modal.querySelectorAll(focusableSelector));
+        setTimeout(() => {
+            if(focusables.length > 0) {
+                focusables[0].focus();
+            }
+        }, 100);
+        if(focusables.length > 0) {
+            previouslyFocusedElement = document.activeElement;
+            focusables[0].focus();
+        } else {
+            console.warn("Aucun élément focusable trouvé dans la modale");
+        }
     } else {
-        console.error("Élément modal introuvable")
+        console.error("Élément modal introuvable");
     }
 }
 
+// Écouteur d'évènements qui attend que le contenu du DOM de la page soit entièrement chargé et
+// prêt avant que le script puisse intéragir avec les éléments HTML //
 
-document.addEventListener('DOMContentLoaded', function() {
+    //Récupère la valeur de modalOpen depuis le localStorage//
     let modalOpen = localStorage.getItem('modalOpen');
     if (modalOpen === 'true') {
         openModal();
     }
     function closeModal () {
         let modal = document.getElementById("modal");
+        const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+        const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
         if (modal) {
             modal.style.display="none";
+            modal.setAttribute('aria-hidden', 'true');
+            modal.setAttribute('aria-modal', 'false');
             localStorage.removeItem('modalOpen');
+
+            galleryEditModal.style.display = "flex";
+            pictureAddModal.style.display = "none";
+
+            if (previouslyFocusedElement !== null) {
+                previouslyFocusedElement.focus()
+            }
         }
     }
-    let exitIcon = document.getElementById("exitIcon");
-    if (exitIcon) {
-        exitIcon.addEventListener('click', closeModal);
+
+    // Îcones de fermeture //
+    const exitIconGalleryEdit = document.getElementById("exitIconGalleryEdit");
+    if (exitIconGalleryEdit) {
+        exitIconGalleryEdit.addEventListener('click', closeModal);
     } else {
-        console.error("Icône de sortie introuvable")
+        console.error("Icône de sortie de la galerie introuvable")
     }
+    const exitIconPictureAdd = document.getElementById("exitIconPictureAdd");
+    if (exitIconPictureAdd) {
+        exitIconPictureAdd.addEventListener('click', closeModal);
+    } else {
+        console.error("Icône de sortie de l'ajout de photo introuvable")
+    }
+
+    // Fermeture de la modale en cliquant sur le fond //
     window.addEventListener('click', function(event) {
         let modal = document.getElementById("modal");
         if(event.target === modal) {
             closeModal()
         }
     })
+    // Empêche le retour en haut de page quand le lien est cliqué //
     let editLink = document.getElementById('editLink');
     if (editLink) {
         editLink.addEventListener('click', function(e){
@@ -203,14 +252,144 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("Lien d'édition introuvable")
     }
-});
 
+    // Fermeture de la modale par la touche Echap //
+    window.addEventListener('keydown',  function(e){
+        const modal = document.getElementById("modal");
+        const isModalOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') === 'false';
+        if(e.key === "Escape" || e.key === "Esc"){
+            if (isModalOpen) {
+             closeModal(e);   
+            }
+        };
+        if(e.key === 'Tab' && isModalOpen){
+            e.preventDefault();
+            focusInModal(e, modal);
+        };
+    });
+
+// Fonction qui va créer le format de chaque projet pour les afficher sur la page web //
 function createProjectElementModal(project){
     const projectElementModal = document.createElement("figure");
     projectElementModal.className = "projectModal";
     const trashIcon = document.createElement("i");
     trashIcon.className = "fa-solid fa-trash-can";
+    trashIcon.setAttribute('tabindex', '0');
     projectElementModal.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">`;
     projectElementModal.appendChild(trashIcon);
     return projectElementModal;
 };
+
+// Fonction qui va gérer le focus d'un élément (accessibilité) //
+function focusInModal(e, modal) {
+    let index = focusables.findIndex(f => f === document.activeElement); 
+    if (e.shiftKey === true){
+        index--;
+    } else {
+        index++;
+    }
+    if (index >= focusables.length){
+        index = 0;
+    }
+    if (index < 0){
+        index = focusables.length - 1;
+    }
+    focusables[index].focus();
+}
+
+// Fonction qui permet de changer de modale quand l'utilisateur clique sur le bouton "Ajouter une photo" //
+document.addEventListener('DOMContentLoaded', function(){
+    const addPictureBtn = document.getElementById("addPictureButton");
+    if (addPictureBtn) {
+        addPictureBtn.addEventListener('click', switchModal);
+    } else {
+        console.error("Bouton d'ajout de photo introuvable");
+    }
+});
+
+        // Fonction qui va permettre de passer d'une modale à l'autre //
+function switchModal() {
+    const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+    const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
+
+    if (galleryEditModal.style.display === 'none'){
+
+        galleryEditModal.style.display = 'flex';
+        pictureAddModal.style.display = 'none';
+        
+        } else {
+            galleryEditModal.style.display = 'none';
+            pictureAddModal.style.display = 'flex';
+        
+        }
+        updateModalAttributesAndFocus(galleryEditModal.style.display !== 'none' ? galleryEditModal : pictureAddModal, galleryEditModal.style.display !== 'none' ? 'modal-title' : 'modal-title-2');
+}
+
+function updateModalAttributesAndFocus(modalElement, ariaLabelledbyId){
+    const modal = document.getElementById('modal');
+    modal.setAttribute('aria-labelledby', ariaLabelledbyId);
+    focusables = Array.from(modalElement.querySelectorAll(focusableSelector));
+    if(focusables.length > 0){
+            focusables[0].focus();
+        } else {
+            console.warn("Aucun élément focusable dans le modale de ajout de photos.");
+        }
+}
+
+function getBack(){
+    const getBackIcon = document.getElementById("getBackIcon");
+    if (getBackIcon){
+        getBackIcon.addEventListener('click', function(){
+            const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
+            const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+
+            pictureAddModal.style.display = 'none';
+            galleryEditModal.style.display = 'flex';
+
+            galleryEditModal.setAttribute('aria-hidden', 'false');
+            pictureAddModal.setAttribute('aria-hidden', 'true');
+            const firstFocusableElement = galleryEditModal.querySelector(focusableSelector);
+            if (firstFocusableElement) {
+                firstFocusableElement.focus();
+            }
+          });
+        getBackIcon.addEventListener('keydown', function(e) {
+        if (e.key === "Enter") {
+                switchToGalleryEditModal();
+            }
+        });
+    }
+}
+getBack();
+
+function switchToGalleryEditModal() {
+    const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
+    const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+
+    if(pictureAddModal && galleryEditModal) {
+        pictureAddModal.style.display = 'none';
+        galleryEditModal.style.display = 'flex';
+
+        galleryEditModal.setAttribute('aria-hidden', 'false');
+        pictureAddModal.setAttribute('aria-hidden', 'true');
+        const firstFocusableElement = galleryEditModal.querySelector(focusableSelector);
+        if (firstFocusableElement) {
+            firstFocusableElement.focus();
+        }
+    }
+}
+
+function setupCloseIconKeyListener() {
+    const exitIcons = document.querySelectorAll(".fa-xmark");
+    exitIcons.forEach(icon => {
+        icon.addEventListener('keydown', function(e) {
+            if (e.key === "Enter") {
+                closeModal();
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupCloseIconKeyListener();
+});
