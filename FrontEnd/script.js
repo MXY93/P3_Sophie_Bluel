@@ -9,8 +9,8 @@ divFilters.classList.add("filters");
 portfolio.appendChild(divFilters);
 portfolio.insertBefore(divFilters, gallery);
 
-function getProjects() {
-   fetch(apiURL)
+async function getProjects() {
+   await fetch(apiURL)
     .then(response => response.json())
     .then(data => {
         console.log(data);
@@ -273,7 +273,6 @@ function checkAndOpenActiveModal(){
         if (editLink) {
             editLink.addEventListener('click', function(e){
                 e.preventDefault();
-                openModalWrapperGalleryEdit
             });
         } else {
             console.error("Lien d'édition introuvable")
@@ -301,11 +300,18 @@ function checkAndOpenActiveModal(){
 function createProjectElementModal(project){
     const projectElementModal = document.createElement("figure");
     projectElementModal.className = "projectModal";
+
+    projectElementModal.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">`;
+
     const trashIcon = document.createElement("i");
     trashIcon.className = "fa-solid fa-trash-can";
+    trashIcon.setAttribute('data-id', project.id);
     trashIcon.setAttribute('tabindex', '0');
-    projectElementModal.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">`;
+    trashIcon.addEventListener('click', function(){
+        deleteProject(this.getAttribute('data-id'));
+    })
     projectElementModal.appendChild(trashIcon);
+    
     return projectElementModal;
 };
 
@@ -419,15 +425,27 @@ function setupCloseIconKeyListener() {
     });
 }
 
+/// DELETE WORKS ///
 document.addEventListener('DOMContentLoaded', function() {
     setupCloseIconKeyListener();
 });
 
-/// DELETE WORKS ///
-fetch(`http://localhost:5678/api/works/${response.id}`, {
-    method: 'DELETE',
-    headers:  {
-        'accept': '*/*',
-       Authorization: `Bearer ${localStorage.token}`
+async function deleteProject(projectId) {
+    console.log("Suppression du projet avec l'ID:", projectId);
+    try {
+        const response = await fetch(`${apiURL}/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+            accept: '*/*',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+        });
+        if (!response.ok) {
+            throw new Error('Erreur lors de la suppression du projet');
+        }
+        document.querySelector(`[data-id="${projectId}"]`).closest('.projectModal').remove();
+
+    } catch (error) {
+        console.error('Erreur fetch:', error);
     }
-});
+}
