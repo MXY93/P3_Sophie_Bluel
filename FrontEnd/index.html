@@ -16,32 +16,42 @@
 	<aside id="modal" aria-hidden="true" style="display:none;" role="dialog" aria-labelledby="modal-title">
 		<div class="modal-wrapper modal1" id="modal-wrapper-GalleryEdit">
 			<div class="icon-container-modalClose">
-				<i id="exitIcon" class="fa-solid fa-xmark"></i>
+				<i id="exitIconGalleryEdit" class="fa-solid fa-xmark" tabindex="0"></i>
 			</div>
 			<h3 class="modal-title">Galerie photo</h3>
 			<div class="modalContent">
 
 			</div>
 			<div class="button-container">
-				<button id="addPictureButton">Ajouter une photo</button>
+				<button id="addPictureButton" class="modal-button">Ajouter une photo</button>
 			</div>
 		</div>
 		<div class="modal-wrapper modal2" id="modal-wrapper-PictureAdd">
-			<div class="icon-container-modalClose modalGetBack"></div>
-			<h3>Ajout photo</h3>
+			<div class="icon-container-modalClose modalGetBack">
+				<i id="getBackIcon" class="fa-solid fa-arrow-left" tabindex="0"></i>
+				<i id="exitIconPictureAdd" class="fa-solid fa-xmark" tabindex="0"></i>
+			</div>
+			<h3 class="modal-title">Ajout photo</h3>
 				<form id="addPictureForm" action="#" method="post" name="addPictureForm">
 					<div class="addPicture">
-						<i></i>
-						<button>+ Ajouter photo</button>
+						<i class="fa-regular fa-image"></i>
+						<button class="modal-button modal-button-add-pic">+ Ajouter photo</button>
 						<p>jpg, png : 4mo max</p>
 					</div>
 					<label for="title">Titre</label>
 					<input type="text" name="title" id="title">
-					<label for="category" id="category">Catégorie</label>
-					<select name="category" id="category">
+					<label for="category">Catégorie</label>
+					<div class="select-container">
+						<select name="category" id="category">
 						
-					</select>
-					<input type="submit" value="Valider">
+						</select>
+					<div class="chevron-container">
+						<i class="fa-solid fa-chevron-down" tabindex="0"></i>
+					</div>
+					</div>
+					<div class="button-container send-button-container">
+						<button id="sendProjectButton" class="modal-button">Valider</button>
+					</div>
 				</form>
 		</div>
 	</aside>
@@ -79,9 +89,9 @@
 		<p>Vous avez un projet ? Discutons-en !</p>
 		<form action="#" method="post">
 			<label for="name">Nom</label>
-			<input type="text" name="name" id="name">
+			<input type="text" name="name" id="name" autocomplete="name">
 			<label for="email">E-mail</label>
-			<input type="email" name="email" id="email">
+			<input type="email" name="email" id="email" autocomplete="name">
 			<label for="message">Message</label>
 			<textarea name="message" id="message" cols="30" rows="10"></textarea>
 			<input type="submit" value="Envoyer">
