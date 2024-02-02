@@ -197,12 +197,36 @@ function openModal () {
 
 // Écouteur d'évènements qui attend que le contenu du DOM de la page soit entièrement chargé et
 // prêt avant que le script puisse intéragir avec les éléments HTML //
+document.addEventListener('DOMContentLoaded', function(){
+    setupModalTriggers();
+    checkAndOpenActiveModal();
+});
 
-    //Récupère la valeur de modalOpen depuis le localStorage//
-    let modalOpen = localStorage.getItem('modalOpen');
-    if (modalOpen === 'true') {
-        openModal();
-    }
+function checkAndOpenActiveModal(){
+   let activeModal = localStorage.getItem('activeModal');
+        if (activeModal === 'modal-wrapper-GalleryEdit') {
+            openModalWrapperGalleryEdit();
+        } else if (activeModal === 'modal-wrapper-PictureAdd'){
+            openModalWrapperPictureAdd();
+        }
+        function openModalWrapperGalleryEdit() {
+            const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+            galleryEditModal.style.display = 'flex';
+            document.getElementById("modal-wrapper-PictureAdd").style.display = "none";
+            localStorage.setItem('activeModal', 'modal-wrapper-GalleryEdit');
+            updateModalAttributesAndFocus(galleryEditModal, 'modal-title');
+        }
+        
+        function openModalWrapperPictureAdd() {
+            const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
+            pictureAddModal.style.display = 'flex';
+            document.getElementById("modal-wrapper-GalleryEdit").style.display = "none";
+            localStorage.setItem('activeModal', 'modal-wrapper-PictureAdd');
+            updateModalAttributesAndFocus(pictureAddModal, 'modal-title-2');
+        } 
+}
+    
+    
     function closeModal () {
         let modal = document.getElementById("modal");
         const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
@@ -211,7 +235,7 @@ function openModal () {
             modal.style.display="none";
             modal.setAttribute('aria-hidden', 'true');
             modal.setAttribute('aria-modal', 'false');
-            localStorage.removeItem('modalOpen');
+            localStorage.removeItem('activeModal');
 
             galleryEditModal.style.display = "flex";
             pictureAddModal.style.display = "none";
@@ -244,14 +268,19 @@ function openModal () {
         }
     })
     // Empêche le retour en haut de page quand le lien est cliqué //
-    let editLink = document.getElementById('editLink');
-    if (editLink) {
-        editLink.addEventListener('click', function(e){
-            e.preventDefault();
-        });
-    } else {
-        console.error("Lien d'édition introuvable")
+    function setupModalTriggers(){
+        const editLink = document.getElementById('editLink');
+        if (editLink) {
+            editLink.addEventListener('click', function(e){
+                e.preventDefault();
+                openModalWrapperGalleryEdit
+            });
+        } else {
+            console.error("Lien d'édition introuvable")
+        }
+        
     }
+    
 
     // Fermeture de la modale par la touche Echap //
     window.addEventListener('keydown',  function(e){
@@ -392,4 +421,13 @@ function setupCloseIconKeyListener() {
 
 document.addEventListener('DOMContentLoaded', function() {
     setupCloseIconKeyListener();
+});
+
+/// DELETE WORKS ///
+fetch(`http://localhost:5678/api/works/${response.id}`, {
+    method: 'DELETE',
+    headers:  {
+        'accept': '*/*',
+       Authorization: `Bearer ${localStorage.token}`
+    }
 });
