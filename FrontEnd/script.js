@@ -255,7 +255,10 @@ function checkAndOpenActiveModal(){
     }
     const exitIconPictureAdd = document.getElementById("exitIconPictureAdd");
     if (exitIconPictureAdd) {
-        exitIconPictureAdd.addEventListener('click', closeModal);
+        exitIconPictureAdd.addEventListener('click', function() {
+            closeModal();
+            resetAddPicture();
+        });
     } else {
         console.error("Icône de sortie de l'ajout de photo introuvable")
     }
@@ -264,7 +267,8 @@ function checkAndOpenActiveModal(){
     window.addEventListener('click', function(event) {
         let modal = document.getElementById("modal");
         if(event.target === modal) {
-            closeModal()
+            closeModal();
+            resetAddPicture();
         }
     })
     // Empêche le retour en haut de page quand le lien est cliqué //
@@ -287,7 +291,8 @@ function checkAndOpenActiveModal(){
         const isModalOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') === 'false';
         if(e.key === "Escape" || e.key === "Esc"){
             if (isModalOpen) {
-             closeModal(e);   
+             closeModal(e); 
+             resetAddPicture(e);  
             }
         };
         if(e.key === 'Tab' && isModalOpen){
@@ -420,6 +425,7 @@ function setupCloseIconKeyListener() {
         icon.addEventListener('keydown', function(e) {
             if (e.key === "Enter") {
                 closeModal();
+                resetAddPicture();
             }
         });
     });
@@ -449,3 +455,145 @@ async function deleteProject(projectId) {
         console.error('Erreur fetch:', error);
     }
 }
+
+// Récupération des catégories pour les insérer dans le select "catégorie" de la modale //
+async function getCategories() {
+    console.log("Récupération des catégories");
+    try {
+       const response = await fetch("http://localhost:5678/api/categories", {
+        method: 'GET',
+        headers: {
+            'accept': 'application/json'
+        }
+        });
+        if (response.ok){
+            const categories = await response.json();
+            console.log("Récupération des catégories RÉUSSIE");
+
+            const selectCategory = document.getElementById("category");
+            categories.forEach(category => {
+                const optionCategory = document.createElement("option");
+                optionCategory.classList.add("optionCategory");
+                optionCategory.value = category.id;
+                optionCategory.textContent = category.name;
+                selectCategory.appendChild(optionCategory);
+            })
+        } else {
+            console.log("Récupération des catégories a FAIL")
+        } 
+    } catch (error) {
+        console.error('Erreur lors de la récupération des catégories:', error);
+    }
+    
+}
+
+getCategories();
+
+// Ajout d'une photo en preview //
+
+
+function loadImage() {
+    const addPicButton = document.querySelector('.modal-button-add-pic');
+    const imgInput = document.getElementById('imageInput');
+
+    if (addPicButton && imgInput) {
+        addPicButton.addEventListener('click', function() {
+            imgInput.value = '';
+            imgInput.click();
+        });
+
+        imgInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const maxSize = 4 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('Le fichier doit être inférieur à 4 Mo.');
+                    return;
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const addPictureDiv = document.querySelector('.addPicture');
+                        addPictureDiv.innerHTML = `<img src="${e.target.result}" alt="Aperçu" style="width: 100%;">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    }
+}
+
+
+
+
+// Réinitialisation pour ne pas sauvegarder l'image quand je quitte la modale //
+
+const initialAddPictureContent = `
+<i class="fa-regular fa-image"></i>
+<button class="modal-button modal-button-add-pic" type="button">+ Ajouter photo</button>
+<p>jpg, png : 4mo max</p>`;
+
+function resetAddPicture() {
+    const addPictureDiv = document.querySelector('.addPicture');
+    if (addPictureDiv) {
+        addPictureDiv.innerHTML = initialAddPictureContent;
+        
+        document.querySelector('.modal-button-add-pic').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+            
+        });
+    }
+}
+loadImage();
+
+function updateSubmitButtonState() {
+    const btn = document.getElementById('sendProjectButton');
+    const requiredFields = document.querySelectorAll('#addPictureForm [required]');
+    const allFilled = Array.from(requiredFields).every(field => field.value.trim() !== '');
+  
+    if (allFilled) {
+      btn.classList.remove('disabled');
+      btn.classList.add('enabled');
+      btn.disabled = false;
+    } else {
+      btn.classList.add('disabled');
+      btn.classList.remove('enabled');
+      btn.disabled = true;
+    }
+  }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const requiredFields = document.querySelectorAll('#addPictureForm [required]');
+  
+    requiredFields.forEach(field => {
+      field.addEventListener('input', updateSubmitButtonState);
+    });
+  
+    updateSubmitButtonState();
+});
+  
+// Poster un projet //
+
+async function postProject(formData){
+    try {
+        const response = await fetch('http://localhost:5678/api/works', {
+                method: "POST",
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+        })
+        if(!response.ok) throw new Error('Erreur lors de l\'envoi du projet');
+        const result = await response.json();
+        console.log('Projet envoyé avec succès', result);
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi des données', error);
+    }
+    
+}
+
+document.getElementById("addPictureForm").addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    postProject(formData);
+})
