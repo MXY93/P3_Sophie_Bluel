@@ -35,22 +35,23 @@
 				<form id="addPictureForm" action="#" method="post" name="addPictureForm">
 					<div class="addPicture">
 						<i class="fa-regular fa-image"></i>
-						<button class="modal-button modal-button-add-pic">+ Ajouter photo</button>
+						<button class="modal-button modal-button-add-pic" type="button">+ Ajouter photo</button>
 						<p>jpg, png : 4mo max</p>
 					</div>
+					<input type="file" id="imageInput" accept=".jpg, .jpeg, .png" style="display: none;">
 					<label for="title">Titre</label>
-					<input type="text" name="title" id="title">
+					<input type="text" name="title" id="title" required>
 					<label for="category">Catégorie</label>
 					<div class="select-container">
-						<select name="category" id="category">
+						<select name="category" id="category" required>
 						
 						</select>
-					<div class="chevron-container">
-						<i class="fa-solid fa-chevron-down" tabindex="0"></i>
-					</div>
+						<div class="chevron-container">
+							<i class="fa-solid fa-chevron-down" tabindex="0"></i>
+						</div>
 					</div>
 					<div class="button-container send-button-container">
-						<button id="sendProjectButton" class="modal-button">Valider</button>
+						<button id="sendProjectButton" class="modal-button" type="submit">Valider</button>
 					</div>
 				</form>
 		</div>
