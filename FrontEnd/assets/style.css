@@ -503,9 +503,11 @@ footer nav ul {
 	-webkit-appearance: none;
 	border: none;
 	padding: 10px;
+	padding-left: 15px;
 	padding-right: 30px;
 	background-color: transparent;
 	width: 100%;
+	font-family: Work Sans;
 }
 
 .select-container .chevron-container {
@@ -520,4 +522,10 @@ footer nav ul {
 .chevron-container i {
 	font-size: 12px;
 	color: rgba(108, 108, 108, 1);
+}
+
+#addPictureForm input {
+	font-size: 14px;
+	font-family: Work Sans;
+	padding-left: 15px;
 }
