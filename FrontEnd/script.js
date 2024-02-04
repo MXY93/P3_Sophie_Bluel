@@ -92,7 +92,7 @@ let textSpan = document.createElement('span');
 let textSpanLink = document.createElement('a');
 
 //Condition d'afficher les différents éléments admin en fonction de si on est connecté ou non //
-if (storedToken === 'eyJhbGciOiJIeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4UzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4'){
+if (storedToken === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNzA1ODA4NywiZXhwIjoxNzA3MTQ0NDg3fQ.cnxALRcvidy9L7IDksHBxpC0RUIxcvJ_S9bCiuVXQe0'){
     // Création de la bannière d'édition //
     let banner = document.createElement("div");
     banner.classList.add("banner");
@@ -431,10 +431,11 @@ function setupCloseIconKeyListener() {
     });
 }
 
-/// DELETE WORKS ///
 document.addEventListener('DOMContentLoaded', function() {
     setupCloseIconKeyListener();
 });
+/// DELETE WORKS ///
+
 
 async function deleteProject(projectId) {
     console.log("Suppression du projet avec l'ID:", projectId);
@@ -442,14 +443,16 @@ async function deleteProject(projectId) {
         const response = await fetch(`${apiURL}/${projectId}`, {
         method: 'DELETE',
         headers: {
-            accept: '*/*',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            "accept": "*/*",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         }
         });
         if (!response.ok) {
             throw new Error('Erreur lors de la suppression du projet');
         }
+        console.log("Travail supprimé avec succès.");
         document.querySelector(`[data-id="${projectId}"]`).closest('.projectModal').remove();
+        return await response.json();
 
     } catch (error) {
         console.error('Erreur fetch:', error);
@@ -573,27 +576,52 @@ document.addEventListener('DOMContentLoaded', function() {
   
 // Poster un projet //
 
-async function postProject(formData){
+async function createNewWork(title, category, imageFile){
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("category", category);
+    formData.append("image", imageFile);
     try {
-        const response = await fetch('http://localhost:5678/api/works', {
+        const response = await fetch(`${apiURL}`, {
                 method: "POST",
                 headers: {
-                    'accept': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: formData
-        })
-        if(!response.ok) throw new Error('Erreur lors de l\'envoi du projet');
-        const result = await response.json();
-        console.log('Projet envoyé avec succès', result);
+                body: formData 
+        });
+
+        if (response.status === 201) {
+            const responseData = await response.json();
+            console.log('Travail créé avec succès:', responseData);
+            return responseData;
+        } else if (response.status === 400) {
+            console.error("Erreur : Mauvaise demande");
+        } else if (response.status === 401) {
+            console.error("Erreur: non autorisé.")
+        } else if(response.status === 500) {
+            console.error(`Erreur non gérée (statut : ${response.status})`);
+        }
     } catch (error) {
-        console.error('Erreur lors de l\'envoi des données', error);
+        console.error('Erreur lors de l\'envoi de la requête:', error);
     }
     
 }
 
-document.getElementById("addPictureForm").addEventListener('submit', function(e){
+document.getElementById("addPictureForm").addEventListener('submit', async function(e){
     e.preventDefault();
     const formData = new FormData(this);
-    postProject(formData);
-})
+
+    const title = formData.get('title');
+    const category = formData.get('category');
+    const imageFile = formData.get('image');
+
+    try {
+        const newWork = await createNewWork(title, category, imageFile);
+        if (newWork) {
+            const projectElement = createProjectElement(newWork);
+            gallery.appendChild(projectElement);
+        }
+    } catch (error) {
+        console.error('Erreur lors de la création du travail:', error);
+    }
+});

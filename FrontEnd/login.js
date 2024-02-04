@@ -14,10 +14,10 @@ loginFormToSend.addEventListener("submit", function (event) {
         body: chargeUtile
     }).then((response) => {
         if (response.status === 200) {
-            return response.json();
             let filterButtons = document.querySelectorAll('.boutonsFiltre');
             filterButtons.forEach(button => {
             button.style.display = 'none';
+            return response.json();
         });
         } else if (response.status === 401) {
             throw new Error('Informations d\'identification incorrectes.');
@@ -27,7 +27,7 @@ loginFormToSend.addEventListener("submit", function (event) {
             throw new Error('Erreur non gérée.');
         }
     }).then((data) => {
-        localStorage.setItem('token', 'eyJhbGciOiJIeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4UzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1MTg3NDkzOSwiZXhwIjoxNjUxOTYxMzM5fQ.JGN1p8YIfR-M-5eQ-Ypy6Ima5cKA4VbfL2xMr2MgHm4');
+        localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNzA1ODA4NywiZXhwIjoxNzA3MTQ0NDg3fQ.cnxALRcvidy9L7IDksHBxpC0RUIxcvJ_S9bCiuVXQe0');
         window.location.replace("index.html");
     }).catch((error) => {
         console.log('Erreur lors de la connexion:', error);

@@ -32,13 +32,13 @@
 				<i id="exitIconPictureAdd" class="fa-solid fa-xmark" tabindex="0"></i>
 			</div>
 			<h3 class="modal-title">Ajout photo</h3>
-				<form id="addPictureForm" action="#" method="post" name="addPictureForm">
+				<form id="addPictureForm" method="post" name="addPictureForm">
 					<div class="addPicture">
 						<i class="fa-regular fa-image"></i>
 						<button class="modal-button modal-button-add-pic" type="button">+ Ajouter photo</button>
 						<p>jpg, png : 4mo max</p>
 					</div>
-					<input type="file" id="imageInput" accept=".jpg, .jpeg, .png" style="display: none;">
+					<input type="file" name="image" id="imageInput" accept=".jpg, .jpeg, .png" style="display: none;">
 					<label for="title">Titre</label>
 					<input type="text" name="title" id="title" required>
 					<label for="category">Catégorie</label>
