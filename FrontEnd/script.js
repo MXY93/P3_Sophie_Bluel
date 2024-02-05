@@ -65,6 +65,7 @@ function showProjects(data) {
 function createProjectElement(project){
     const projectElement = document.createElement("figure");
     projectElement.className = "project";
+    projectElement.setAttribute('data-id', project.id)
     const adjustedTitle = adjustTitle(project.title);
     projectElement.innerHTML = `<img src="${project.imageUrl}" alt="${project.title}">
                                 <h3>${adjustedTitle}</h3>`;
@@ -452,8 +453,10 @@ async function deleteProject(projectId) {
         }
         console.log("Travail supprimé avec succès.");
         document.querySelector(`[data-id="${projectId}"]`).closest('.projectModal').remove();
-        return await response.json();
-
+        const projectElementInMainView = document.querySelector(`.gallery [data-id="${projectId}"]`);
+        if (projectElementInMainView) {
+            projectElementInMainView.closest('.project').remove();
+        }
     } catch (error) {
         console.error('Erreur fetch:', error);
     }
@@ -525,7 +528,7 @@ function loadImage() {
     }
 }
 
-
+loadImage();
 
 
 // Réinitialisation pour ne pas sauvegarder l'image quand je quitte la modale //
@@ -546,7 +549,18 @@ function resetAddPicture() {
         });
     }
 }
-loadImage();
+
+function resetAddProjectModal() {
+    document.getElementById("addPictureForm").reset();
+
+    const addPictureDiv = document.querySelector('.addPicture');
+    addPictureDiv.innerHTML = `
+        <i class="fa-regular fa-image"></i>
+        <button class="modal-button modal-button-add-pic" type="button">+ Ajouter photo</button>
+        <p>jpg, png : 4mo max</p>
+    `;
+}
+
 
 function updateSubmitButtonState() {
     const btn = document.getElementById('sendProjectButton');
@@ -593,6 +607,9 @@ async function createNewWork(title, category, imageFile){
         if (response.status === 201) {
             const responseData = await response.json();
             console.log('Travail créé avec succès:', responseData);
+            addProjectToModal(responseData);
+            resetAddProjectModal();
+            closeModal();
             return responseData;
         } else if (response.status === 400) {
             console.error("Erreur : Mauvaise demande");
@@ -625,3 +642,8 @@ document.getElementById("addPictureForm").addEventListener('submit', async funct
         console.error('Erreur lors de la création du travail:', error);
     }
 });
+
+function addProjectToModal(project) {
+    const projectElementModal = createProjectElementModal(project);
+    document.querySelector(".modalContent").appendChild(projectElementModal);
+}
