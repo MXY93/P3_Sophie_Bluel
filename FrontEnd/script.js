@@ -1,10 +1,10 @@
-const apiURL = "http://localhost:5678/api/works";
+let apiURL = "http://localhost:5678/api/works";
 
 let globalProjectsData = [];
 let categoryToIdMap = {};
-const gallery = document.querySelector(".gallery");
-const portfolio = document.getElementById("portfolio");
-const divFilters = document.createElement("div");
+let gallery = document.querySelector(".gallery");
+let portfolio = document.getElementById("portfolio");
+let divFilters = document.createElement("div");
 divFilters.classList.add("filters");
 portfolio.appendChild(divFilters);
 portfolio.insertBefore(divFilters, gallery);
@@ -93,7 +93,7 @@ let textSpan = document.createElement('span');
 let textSpanLink = document.createElement('a');
 
 //Condition d'afficher les différents éléments admin en fonction de si on est connecté ou non //
-if (storedToken === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcwNzA1ODA4NywiZXhwIjoxNzA3MTQ0NDg3fQ.cnxALRcvidy9L7IDksHBxpC0RUIxcvJ_S9bCiuVXQe0'){
+if (storedToken){
     // Création de la bannière d'édition //
     let banner = document.createElement("div");
     banner.classList.add("banner");
@@ -501,7 +501,7 @@ getCategories();
 function loadImage() {
     const addPicButton = document.querySelector('.modal-button-add-pic');
     const imgInput = document.getElementById('imageInput');
-
+    
     if (addPicButton && imgInput) {
         addPicButton.addEventListener('click', function() {
             imgInput.value = '';
@@ -542,11 +542,10 @@ function resetAddPicture() {
     const addPictureDiv = document.querySelector('.addPicture');
     if (addPictureDiv) {
         addPictureDiv.innerHTML = initialAddPictureContent;
-        
         document.querySelector('.modal-button-add-pic').addEventListener('click', function() {
             document.getElementById('imageInput').click();
-            
         });
+        
     }
 }
 
@@ -588,9 +587,20 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSubmitButtonState();
 });
   
-// Poster un projet //
+// fonction POST un projet //
 
 async function createNewWork(title, category, imageFile){
+    let errors = [];
+    if (!title || title.trim().length === 0) {
+        errors.push("Titre manquant.");
+    };
+    if(!imageFile || imageFile.size === 0){
+        errors.push("Image manquante.");
+    };
+    if (errors.length > 0) {
+        alert(`Le formulaire n'est pas correctement rempli:\n${errors.join('\n')}`);
+        return;
+    };
     const formData = new FormData();
     formData.append("title", title);
     formData.append("category", category);
@@ -603,11 +613,9 @@ async function createNewWork(title, category, imageFile){
                 },
                 body: formData 
         });
-
         if (response.status === 201) {
             const responseData = await response.json();
             console.log('Travail créé avec succès:', responseData);
-            addProjectToModal(responseData);
             resetAddProjectModal();
             closeModal();
             return responseData;
@@ -634,16 +642,7 @@ document.getElementById("addPictureForm").addEventListener('submit', async funct
 
     try {
         const newWork = await createNewWork(title, category, imageFile);
-        if (newWork) {
-            const projectElement = createProjectElement(newWork);
-            gallery.appendChild(projectElement);
-        }
     } catch (error) {
         console.error('Erreur lors de la création du travail:', error);
     }
 });
-
-function addProjectToModal(project) {
-    const projectElementModal = createProjectElementModal(project);
-    document.querySelector(".modalContent").appendChild(projectElementModal);
-}
