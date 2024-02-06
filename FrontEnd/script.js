@@ -1,4 +1,4 @@
-let apiURL = "http://localhost:5678/api/works";
+const apiURL = "http://localhost:5678/api/works";
 
 let globalProjectsData = [];
 let categoryToIdMap = {};
@@ -6,20 +6,24 @@ let gallery = document.querySelector(".gallery");
 let portfolio = document.getElementById("portfolio");
 let divFilters = document.createElement("div");
 divFilters.classList.add("filters");
-portfolio.appendChild(divFilters);
 portfolio.insertBefore(divFilters, gallery);
 
 async function getProjects() {
-   await fetch(apiURL)
-    .then(response => response.json())
-    .then(data => {
+    try {
+        const response = await fetch(apiURL);
+        if (!response.ok) {
+            throw new Error('Failed to fetch projects');
+        }
+        const data = await response.json();
         console.log(data);
         globalProjectsData = data;
         createCategoryToIdMap(data);
         createFilterButtons();
         showProjects(data);
         showProjectsInModal();
-    }) 
+    } catch (error){
+        console.error('Error fetching projects:', error);
+    }
 }
 
 function createCategoryToIdMap(data) {
@@ -145,9 +149,7 @@ if (storedToken){
     divMyProjects.appendChild(myProjects)
     divMyProjects.appendChild(modifPrg);
 
-    if(storedToken) {
-        myProjects.style.marginBottom  = "0px";
-    }
+    myProjects.style.marginBottom  = "0px";
 
     portfolio.appendChild(divMyProjects);
     portfolio.insertBefore(divMyProjects, filters);
@@ -162,7 +164,7 @@ const focusableSelector = "button, a, input, textarea, .fa-xmark, .fa-trash-can,
 let focusables = [];
 let previouslyFocusedElement = null;
 
-// Fonction qui récupère les projets de l'API //
+// Fonction qui crée et affiche chaque projet récupéré depuis l'API dans la modale  //
 function showProjectsInModal(){
     globalProjectsData.forEach(project => {
         const projectElementModal = createProjectElementModal(project);
@@ -178,6 +180,9 @@ function openModal () {
         modal.setAttribute('aria-hidden', 'false');
         modal.setAttribute('aria-modal', 'true');
         localStorage.setItem('modalOpen', 'true');
+        document.querySelector(".modalContent").innerHTML = '';
+        showProjectsInModal();
+        setupImageUploadListener()
         document.getElementById("modal-wrapper-PictureAdd").style.display = "none";
         focusables = Array.from(modal.querySelectorAll(focusableSelector));
         setTimeout(() => {
@@ -198,10 +203,6 @@ function openModal () {
 
 // Écouteur d'évènements qui attend que le contenu du DOM de la page soit entièrement chargé et
 // prêt avant que le script puisse intéragir avec les éléments HTML //
-document.addEventListener('DOMContentLoaded', function(){
-    setupModalTriggers();
-    checkAndOpenActiveModal();
-});
 
 function checkAndOpenActiveModal(){
    let activeModal = localStorage.getItem('activeModal');
@@ -226,7 +227,7 @@ function checkAndOpenActiveModal(){
             updateModalAttributesAndFocus(pictureAddModal, 'modal-title-2');
         } 
 }
-    
+checkAndOpenActiveModal();    
     
     function closeModal () {
         let modal = document.getElementById("modal");
@@ -240,6 +241,7 @@ function checkAndOpenActiveModal(){
 
             galleryEditModal.style.display = "flex";
             pictureAddModal.style.display = "none";
+            setupImageUploadListener()
 
             if (previouslyFocusedElement !== null) {
                 previouslyFocusedElement.focus()
@@ -247,7 +249,7 @@ function checkAndOpenActiveModal(){
         }
     }
 
-    // Îcones de fermeture //
+    // Îcones de fermeture de la modale//
     const exitIconGalleryEdit = document.getElementById("exitIconGalleryEdit");
     if (exitIconGalleryEdit) {
         exitIconGalleryEdit.addEventListener('click', closeModal);
@@ -258,7 +260,6 @@ function checkAndOpenActiveModal(){
     if (exitIconPictureAdd) {
         exitIconPictureAdd.addEventListener('click', function() {
             closeModal();
-            resetAddPicture();
         });
     } else {
         console.error("Icône de sortie de l'ajout de photo introuvable")
@@ -269,7 +270,6 @@ function checkAndOpenActiveModal(){
         let modal = document.getElementById("modal");
         if(event.target === modal) {
             closeModal();
-            resetAddPicture();
         }
     })
     // Empêche le retour en haut de page quand le lien est cliqué //
@@ -284,7 +284,7 @@ function checkAndOpenActiveModal(){
         }
         
     }
-    
+    setupModalTriggers();
 
     // Fermeture de la modale par la touche Echap //
     window.addEventListener('keydown',  function(e){
@@ -302,7 +302,7 @@ function checkAndOpenActiveModal(){
         };
     });
 
-// Fonction qui va créer le format de chaque projet pour les afficher sur la page web //
+// Fonction qui crée le format de chaque projet dans la modale ainsi que l'icône de suppression //
 function createProjectElementModal(project){
     const projectElementModal = document.createElement("figure");
     projectElementModal.className = "projectModal";
@@ -317,7 +317,6 @@ function createProjectElementModal(project){
         deleteProject(this.getAttribute('data-id'));
     })
     projectElementModal.appendChild(trashIcon);
-    
     return projectElementModal;
 };
 
@@ -432,9 +431,7 @@ function setupCloseIconKeyListener() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    setupCloseIconKeyListener();
-});
+setupCloseIconKeyListener();
 /// DELETE WORKS ///
 
 
@@ -452,10 +449,11 @@ async function deleteProject(projectId) {
             throw new Error('Erreur lors de la suppression du projet');
         }
         console.log("Travail supprimé avec succès.");
+        globalProjectsData = globalProjectsData.filter((project) => project.id != projectId);
         document.querySelector(`[data-id="${projectId}"]`).closest('.projectModal').remove();
-        const projectElementInMainView = document.querySelector(`.gallery [data-id="${projectId}"]`);
-        if (projectElementInMainView) {
-            projectElementInMainView.closest('.project').remove();
+        const projectElementOnHomePage = document.querySelector(`.project[data-id="${projectId}"]`);
+        if (projectElementOnHomePage) {
+            projectElementOnHomePage.remove();
         }
     } catch (error) {
         console.error('Erreur fetch:', error);
@@ -497,38 +495,29 @@ getCategories();
 
 // Ajout d'une photo en preview //
 
-
-function loadImage() {
+function setupImageUploadListener(){
+    const pictureInput = document.getElementById('imageInput');
     const addPicButton = document.querySelector('.modal-button-add-pic');
-    const imgInput = document.getElementById('imageInput');
-    
-    if (addPicButton && imgInput) {
-        addPicButton.addEventListener('click', function() {
-            imgInput.value = '';
-            imgInput.click();
-        });
 
-        imgInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const maxSize = 4 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    alert('Le fichier doit être inférieur à 4 Mo.');
-                    return;
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const addPictureDiv = document.querySelector('.addPicture');
-                        addPictureDiv.innerHTML = `<img src="${e.target.result}" alt="Aperçu" style="width: 100%;">`;
-                    };
-                    reader.readAsDataURL(file);
-                }
+    if (addPicButton) {
+        addPicButton.onclick = function() {
+            if (pictureInput) {
+                pictureInput.click();
             }
-        });
+        }
+    }
+    if (pictureInput){
+        pictureInput.onchange = function(){
+            const [file] = this.files;
+            if (file.size <= 4 * 1024 * 1024) {
+                const picturePreviewDiv = document.querySelector('.addPicture');
+                picturePreviewDiv.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Aperçu" style="width: 100%;">`;
+            } else {
+                alert('Le fichier doit être inférieur à 4 Mo.');
+            }
+        }
     }
 }
-
-loadImage();
 
 
 // Réinitialisation pour ne pas sauvegarder l'image quand je quitte la modale //
@@ -542,16 +531,12 @@ function resetAddPicture() {
     const addPictureDiv = document.querySelector('.addPicture');
     if (addPictureDiv) {
         addPictureDiv.innerHTML = initialAddPictureContent;
-        document.querySelector('.modal-button-add-pic').addEventListener('click', function() {
-            document.getElementById('imageInput').click();
-        });
-        
     }
+    document.getElementById('imageInput').value = '';
 }
 
 function resetAddProjectModal() {
     document.getElementById("addPictureForm").reset();
-
     const addPictureDiv = document.querySelector('.addPicture');
     addPictureDiv.innerHTML = `
         <i class="fa-regular fa-image"></i>
@@ -559,7 +544,6 @@ function resetAddProjectModal() {
         <p>jpg, png : 4mo max</p>
     `;
 }
-
 
 function updateSubmitButtonState() {
     const btn = document.getElementById('sendProjectButton');
@@ -587,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSubmitButtonState();
 });
   
-// fonction POST un projet //
+// POST un projet //
 
 async function createNewWork(title, category, imageFile){
     let errors = [];
@@ -616,9 +600,11 @@ async function createNewWork(title, category, imageFile){
         if (response.status === 201) {
             const responseData = await response.json();
             console.log('Travail créé avec succès:', responseData);
-            resetAddProjectModal();
+            globalProjectsData.push(responseData);
+            const newProjectElement = createProjectElement(responseData);
+            gallery.appendChild(newProjectElement);
             closeModal();
-            return responseData;
+            resetAddProjectModal();
         } else if (response.status === 400) {
             console.error("Erreur : Mauvaise demande");
         } else if (response.status === 401) {
@@ -629,7 +615,6 @@ async function createNewWork(title, category, imageFile){
     } catch (error) {
         console.error('Erreur lors de l\'envoi de la requête:', error);
     }
-    
 }
 
 document.getElementById("addPictureForm").addEventListener('submit', async function(e){
