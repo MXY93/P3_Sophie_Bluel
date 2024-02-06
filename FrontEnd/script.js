@@ -1,13 +1,14 @@
 const apiURL = "http://localhost:5678/api/works";
 
-let globalProjectsData = [];
-let categoryToIdMap = {};
+let globalProjectsData = []; //Tableau vide pour stocker les données des projets récupérées depuis l'API.
+let categoryToIdMap = {}; // Objet vide pour associer les noms de catégories avec leurs identifiants.
 let gallery = document.querySelector(".gallery");
 let portfolio = document.getElementById("portfolio");
 let divFilters = document.createElement("div");
 divFilters.classList.add("filters");
 portfolio.insertBefore(divFilters, gallery);
 
+// Récupère les projets, crée une carte de catégories, les boutons de filtres et affiche les projets //
 async function getProjects() {
     try {
         const response = await fetch(apiURL);
@@ -26,6 +27,7 @@ async function getProjects() {
     }
 }
 
+// Correspondance entre les noms des catégories et leurs identifiants à partir des données des projets //
 function createCategoryToIdMap(data) {
     data.forEach(project => {
         if (!categoryToIdMap[project.category.name]) {
@@ -33,6 +35,8 @@ function createCategoryToIdMap(data) {
         }
     });
 }
+
+// Génère des boutons de filtre pour chaque catégorie de projet + un bouton pour tous les projets //
 function createFilterButtons() {
     const uniqueCategoryNames = [...new Set(globalProjectsData.map(item => item.category.name))];
     createButton("Tous", showAllProjects, divFilters);
@@ -42,6 +46,7 @@ function createFilterButtons() {
     });
 }
 
+// Création d'un bouton avec un gestionnaire d'évènements et insertion dans le conteneur //
 function createButton(text, eventListener, container){
     const button = document.createElement('button');
     button.innerText = text;
@@ -50,6 +55,7 @@ function createButton(text, eventListener, container){
     container.appendChild(button);
 }
 
+// Permet d'ajuster les titres des projets
 function adjustTitle(title){
     const corrections = {
         "Hotels & restaurants": "Hôtels & restaurants",
@@ -59,6 +65,8 @@ function adjustTitle(title){
     };
     return corrections [title] || title;
 }
+
+// Efface le contenu de la galerie puis affiche chaque projet créé //
 function showProjects(data) {
     gallery.innerHTML = "";
     data.forEach(project => {
@@ -66,6 +74,7 @@ function showProjects(data) {
         gallery.appendChild(projectElement);
 })}
 
+// Crée le format du projet (image + titre) //
 function createProjectElement(project){
     const projectElement = document.createElement("figure");
     projectElement.className = "project";
@@ -75,9 +84,13 @@ function createProjectElement(project){
                                 <h3>${adjustedTitle}</h3>`;
     return projectElement;
 }
+
+// Affiche tous les projets //
 function showAllProjects(){
     showProjects(globalProjectsData);
 }
+
+// Filtre les projets par catégorie et les affiche //
 function filterItems(categoryName) {
     const categoryId = categoryToIdMap[categoryName];
     const filteredProjects = globalProjectsData.filter(project => project.categoryId === categoryId);
@@ -201,9 +214,7 @@ function openModal () {
     }
 }
 
-// Écouteur d'évènements qui attend que le contenu du DOM de la page soit entièrement chargé et
-// prêt avant que le script puisse intéragir avec les éléments HTML //
-
+//Fonction qui vérifie quelle modale ouvrir et quelle modale fermer
 function checkAndOpenActiveModal(){
    let activeModal = localStorage.getItem('activeModal');
         if (activeModal === 'modal-wrapper-GalleryEdit') {
@@ -228,79 +239,80 @@ function checkAndOpenActiveModal(){
         } 
 }
 checkAndOpenActiveModal();    
-    
-    function closeModal () {
-        let modal = document.getElementById("modal");
-        const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
-        const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
-        if (modal) {
-            modal.style.display="none";
-            modal.setAttribute('aria-hidden', 'true');
-            modal.setAttribute('aria-modal', 'false');
-            localStorage.removeItem('activeModal');
 
-            galleryEditModal.style.display = "flex";
-            pictureAddModal.style.display = "none";
-            setupImageUploadListener()
+// Fonction qui ferme la modale
+function closeModal () {
+    let modal = document.getElementById("modal");
+    const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
+    const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
+    if (modal) {
+        modal.style.display="none";
+        modal.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('aria-modal', 'false');
+        localStorage.removeItem('activeModal');
 
-            if (previouslyFocusedElement !== null) {
-                previouslyFocusedElement.focus()
-            }
+        galleryEditModal.style.display = "flex";
+        pictureAddModal.style.display = "none";
+        setupImageUploadListener()
+
+        if (previouslyFocusedElement !== null) {
+            previouslyFocusedElement.focus()
         }
     }
+}
 
-    // Îcones de fermeture de la modale//
-    const exitIconGalleryEdit = document.getElementById("exitIconGalleryEdit");
-    if (exitIconGalleryEdit) {
-        exitIconGalleryEdit.addEventListener('click', closeModal);
-    } else {
-        console.error("Icône de sortie de la galerie introuvable")
+// Icônes de fermeture de la modale//
+const exitIconGalleryEdit = document.getElementById("exitIconGalleryEdit");
+if (exitIconGalleryEdit) {
+    exitIconGalleryEdit.addEventListener('click', closeModal);
+} else {
+    console.error("Icône de sortie de la galerie introuvable")
+}
+const exitIconPictureAdd = document.getElementById("exitIconPictureAdd");
+if (exitIconPictureAdd) {
+    exitIconPictureAdd.addEventListener('click', function() {
+        closeModal();
+    });
+} else {
+    console.error("Icône de sortie de l'ajout de photo introuvable")
+}
+
+// Fermeture de la modale en cliquant sur le fond //
+window.addEventListener('click', function(event) {
+    let modal = document.getElementById("modal");
+    if(event.target === modal) {
+        closeModal();
     }
-    const exitIconPictureAdd = document.getElementById("exitIconPictureAdd");
-    if (exitIconPictureAdd) {
-        exitIconPictureAdd.addEventListener('click', function() {
-            closeModal();
+})
+// Empêche le retour en haut de page quand le lien est cliqué //
+function setupModalTriggers(){
+    const editLink = document.getElementById('editLink');
+    if (editLink) {
+        editLink.addEventListener('click', function(e){
+            e.preventDefault();
         });
     } else {
-        console.error("Icône de sortie de l'ajout de photo introuvable")
+        console.error("Lien d'édition introuvable")
     }
+    
+}
+setupModalTriggers();
 
-    // Fermeture de la modale en cliquant sur le fond //
-    window.addEventListener('click', function(event) {
-        let modal = document.getElementById("modal");
-        if(event.target === modal) {
-            closeModal();
+// Fermeture de la modale par la touche Echap //
+window.addEventListener('keydown',  function(e){
+    const modal = document.getElementById("modal");
+    const isModalOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') === 'false';
+    if(e.key === "Escape" || e.key === "Esc"){
+        if (isModalOpen) {
+            closeModal(e); 
+            resetAddPicture(e);  
         }
-    })
-    // Empêche le retour en haut de page quand le lien est cliqué //
-    function setupModalTriggers(){
-        const editLink = document.getElementById('editLink');
-        if (editLink) {
-            editLink.addEventListener('click', function(e){
-                e.preventDefault();
-            });
-        } else {
-            console.error("Lien d'édition introuvable")
-        }
-        
-    }
-    setupModalTriggers();
-
-    // Fermeture de la modale par la touche Echap //
-    window.addEventListener('keydown',  function(e){
-        const modal = document.getElementById("modal");
-        const isModalOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') === 'false';
-        if(e.key === "Escape" || e.key === "Esc"){
-            if (isModalOpen) {
-             closeModal(e); 
-             resetAddPicture(e);  
-            }
-        };
-        if(e.key === 'Tab' && isModalOpen){
-            e.preventDefault();
-            focusInModal(e, modal);
-        };
-    });
+    };
+    if(e.key === 'Tab' && isModalOpen){
+        e.preventDefault();
+        focusInModal(e, modal);
+    };
+});
 
 // Fonction qui crée le format de chaque projet dans la modale ainsi que l'icône de suppression //
 function createProjectElementModal(project){
@@ -320,7 +332,7 @@ function createProjectElementModal(project){
     return projectElementModal;
 };
 
-// Fonction qui va gérer le focus d'un élément (accessibilité) //
+// Fonction qui va gérer la navigation au clavier dans la modale avec TAB et shift-TAB //
 function focusInModal(e, modal) {
     let index = focusables.findIndex(f => f === document.activeElement); 
     if (e.shiftKey === true){
@@ -347,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 });
 
-        // Fonction qui va permettre de passer d'une modale à l'autre //
+// Fonction qui va permettre de passer d'une modale à l'autre //
 function switchModal() {
     const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
     const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
@@ -365,6 +377,7 @@ function switchModal() {
         updateModalAttributesAndFocus(galleryEditModal.style.display !== 'none' ? galleryEditModal : pictureAddModal, galleryEditModal.style.display !== 'none' ? 'modal-title' : 'modal-title-2');
 }
 
+// Fonction qui met à jour les attributs aria et gère le focus à l'intérieur de la modale //
 function updateModalAttributesAndFocus(modalElement, ariaLabelledbyId){
     const modal = document.getElementById('modal');
     modal.setAttribute('aria-labelledby', ariaLabelledbyId);
@@ -376,6 +389,7 @@ function updateModalAttributesAndFocus(modalElement, ariaLabelledbyId){
         }
 }
 
+// Fonction qui permet de retourner à la modale précédente en cliquant sur l'icône de flèche //
 function getBack(){
     const getBackIcon = document.getElementById("getBackIcon");
     if (getBackIcon){
@@ -402,6 +416,7 @@ function getBack(){
 }
 getBack();
 
+// Fonction qui retourne spécifiquement à la modale de la galerie //
 function switchToGalleryEditModal() {
     const pictureAddModal = document.getElementById("modal-wrapper-PictureAdd");
     const galleryEditModal = document.getElementById("modal-wrapper-GalleryEdit");
@@ -419,6 +434,7 @@ function switchToGalleryEditModal() {
     }
 }
 
+// Fermeture et réinitialisation de la modale en appuyant sur entrée quand le focus est sur l'icône//
 function setupCloseIconKeyListener() {
     const exitIcons = document.querySelectorAll(".fa-xmark");
     exitIcons.forEach(icon => {
@@ -432,9 +448,8 @@ function setupCloseIconKeyListener() {
 }
 
 setupCloseIconKeyListener();
+
 /// DELETE WORKS ///
-
-
 async function deleteProject(projectId) {
     console.log("Suppression du projet avec l'ID:", projectId);
     try {
@@ -493,7 +508,8 @@ async function getCategories() {
 
 getCategories();
 
-// Ajout d'une photo en preview //
+// Ajout d'une photo en preview // 
+// Cependant à ne pas utiliser côté client dans un vrai projet car non sécurisé //
 
 function setupImageUploadListener(){
     const pictureInput = document.getElementById('imageInput');
@@ -545,6 +561,7 @@ function resetAddProjectModal() {
     `;
 }
 
+//Fonction qui change le style du bouton en fonction du remplissage du formulaire//
 function updateSubmitButtonState() {
     const btn = document.getElementById('sendProjectButton');
     const requiredFields = document.querySelectorAll('#addPictureForm [required]');
